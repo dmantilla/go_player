@@ -9,6 +9,8 @@ import (
   "strings"
   "syscall"
   "bufio"
+	"math/rand"
+	"time"
 )
 
 type track struct {
@@ -44,8 +46,10 @@ func play(tracks []track) {
   var pInfo PlayInfo
 	var trackName string
 
-  for _, track := range tracks {
-    playNext <- track
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+  for _, track := range r.Perm(len(tracks)) {
+    playNext <- tracks[track]
     for {
       select {
       case pInfo = <- playInfo:
@@ -61,7 +65,7 @@ func play(tracks []track) {
         case "s":
           pInfo.cmd.Process.Signal(syscall.SIGTERM)
           fmt.Println("skipping...", trackName)
-				default:
+    		default:
 					fmt.Println("I can't understand \"", userCommand, "\" ...")
         }
       }
