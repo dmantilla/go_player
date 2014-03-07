@@ -45,6 +45,7 @@ func play(tracks []track) {
 
   var pInfo PlayInfo
 	var trackName string
+	var userCommand string
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
@@ -54,7 +55,7 @@ func play(tracks []track) {
       select {
       case pInfo = <- playInfo:
 				trackName = pInfo.t.info.Name()
-      case userCommand := <- userInput:
+      case userCommand = <- userInput:
         switch userCommand {
         case "p":
           pInfo.cmd.Process.Signal(syscall.SIGSTOP)
@@ -65,12 +66,17 @@ func play(tracks []track) {
         case "s":
           pInfo.cmd.Process.Signal(syscall.SIGTERM)
           fmt.Println("skipping...", trackName)
+				case "q":
+					pInfo.cmd.Process.Signal(syscall.SIGTERM)
+					fmt.Println("quitting...")
     		default:
 					fmt.Println("I can't understand \"", userCommand, "\" ...")
         }
       }
       if pInfo.action == "done" { break }
+			if userCommand == "q" { break }
     }
+		if userCommand == "q" { break }
   }
 }
 
